@@ -1,3 +1,4 @@
+
 # Codex インストール手順ガイド
 
 ## 概要
@@ -49,6 +50,20 @@
 - Codexウィンドウで指示を入力
 - 提案されたコードを確認・適用
 
+### API Key 設定（Cursor）
+CursorはOpenAIのAPI Keyを利用できます。詳細手順は `cursor-codex-api-key-setup.md` にまとまっています。ここでは要点のみ記載します。
+
+1) OpenAIのAPI Key取得
+- https://platform.openai.com/api-keys で「Create new secret key」→ コピーして安全に保存
+
+2) Cursorに設定
+- 設定を開く（mac: `Cmd+,` / win/linux: `Ctrl+,`）→ 「Models」→ 「Custom API Keys」→ 「OpenAI API Key」に貼り付け
+- 「Verify」で疎通確認（✓ Verified が表示されればOK）
+
+3) セキュリティ
+- API Keyは環境変数やSecret管理を推奨。レポや共有ドキュメントに貼り付けない
+- 失効・ローテーションを定期的に実施
+
 ---
 
 ## 2. CLI版 Codex
@@ -80,6 +95,33 @@ Codex CLIには3つの実行モードがあります：
 | **Suggest** | 提案のみ | 最高 | 学習・確認 |
 | **Auto Edit** | 編集提案を自動承認 | 中 | 日常的な作業 |
 | **Full Auto** | 完全自動実行 | 低 | 高度な自動化 |
+
+### API Key 設定（CLI）
+CLIは認証フロー（`codex login`）に加え、環境変数のAPI Key設定にも対応するケースがあります。まずは公式の`codex login`での認証を推奨し、必要に応じて環境変数を設定してください。
+
+1) ブラウザ認証（推奨）
+```bash
+codex login
+```
+
+2) 環境変数でのAPI Key設定（必要時）
+- macOS/Linux（zsh/bash）
+```bash
+export OPENAI_API_KEY="sk-..."
+echo 'export OPENAI_API_KEY="sk-..."' >> ~/.zshrc  # 永続化（zsh使用時）
+source ~/.zshrc
+```
+- Windows（PowerShell）
+```powershell
+setx OPENAI_API_KEY "sk-..."   # 新しいセッションから有効
+$env:OPENAI_API_KEY = "sk-..."  # 現在のセッションのみ
+```
+
+3) 動作確認
+```bash
+codex --suggest "READMEの要約を提案して" --file README.md
+```
+エラーが出る場合は、`codex login`の再実行、または`OPENAI_API_KEY`の値・タイプミスを確認してください。
 
 ### 基本的な使用方法
 
