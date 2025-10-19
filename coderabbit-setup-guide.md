@@ -78,7 +78,174 @@ jobs:
 
 ---
 
-## 2. CodeRabbit CLI を使用する方法
+## 2. VS Code プラグインを使用する方法
+
+### 環境要件
+- Visual Studio Code
+- CodeRabbitアカウント
+- Gitリポジトリ
+
+### インストール手順
+
+#### ステップ1: プラグインのインストール
+1. VS Codeを開く
+2. 拡張機能タブ（`Ctrl+Shift+X`）を開く
+3. 「CodeRabbit」で検索
+4. 「CodeRabbit」プラグインをインストール
+5. VS Codeを再起動
+
+#### ステップ2: 認証設定
+1. VS Codeでコマンドパレット（`Ctrl+Shift+P`）を開く
+2. 「CodeRabbit: Login」を実行
+3. ブラウザでCodeRabbitアカウントにログイン
+4. 認証完了後、VS Codeに戻る
+
+#### ステップ3: リポジトリの設定
+1. Gitリポジトリを開く
+2. コマンドパレットで「CodeRabbit: Setup Repository」を実行
+3. リポジトリの設定を確認・完了
+
+### 基本的な使用方法
+
+#### コードレビューの実行
+```bash
+# コマンドパレットから実行
+Ctrl+Shift+P → "CodeRabbit: Review Current File"
+Ctrl+Shift+P → "CodeRabbit: Review Selection"
+Ctrl+Shift+P → "CodeRabbit: Review Repository"
+```
+
+#### キーボードショートカット
+- `Ctrl+Shift+R`: 現在のファイルをレビュー
+- `Ctrl+Shift+S`: 選択したコードをレビュー
+- `Ctrl+Shift+T`: リポジトリ全体をレビュー
+
+### 設定とカスタマイズ
+
+#### 設定ファイル（settings.json）
+```json
+{
+  "coderabbit.enabled": true,
+  "coderabbit.autoReview": true,
+  "coderabbit.language": "ja",
+  "coderabbit.profile": "chill",
+  "coderabbit.maxComments": 10,
+  "coderabbit.excludePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "build/**"
+  ],
+  "coderabbit.includePatterns": [
+    "src/**",
+    "lib/**"
+  ]
+}
+```
+
+#### ワークスペース設定
+```json
+{
+  "coderabbit.workspace.enabled": true,
+  "coderabbit.workspace.configFile": ".coderabbit.yml",
+  "coderabbit.workspace.autoReview": true,
+  "coderabbit.workspace.notifications": true
+}
+```
+
+### 高度な設定
+
+#### カスタムレビュー設定
+```json
+{
+  "coderabbit.customInstructions": {
+    "focusAreas": [
+      "security",
+      "performance",
+      "maintainability"
+    ],
+    "tone": "professional",
+    "language": "ja"
+  }
+}
+```
+
+#### ファイル別設定
+```json
+{
+  "coderabbit.fileSettings": {
+    "**/*.js": {
+      "focusAreas": ["performance", "security"],
+      "customInstructions": "JavaScriptのベストプラクティスに従ってレビューしてください"
+    },
+    "**/*.py": {
+      "focusAreas": ["maintainability", "performance"],
+      "customInstructions": "PEP8規約に従ってレビューしてください"
+    }
+  }
+}
+```
+
+### 統合機能
+
+#### Git統合
+- **プルリクエスト**: 自動レビュー
+- **ブランチ**: ブランチ別レビュー設定
+- **コミット**: コミットメッセージの提案
+
+#### エディタ統合
+- **インラインコメント**: コード内での直接コメント
+- **問題パネル**: レビュー結果の表示
+- **クイックフィックス**: 自動修正提案
+
+### トラブルシューティング
+
+#### 認証エラー
+```bash
+# 認証情報のクリア
+Ctrl+Shift+P → "CodeRabbit: Logout"
+Ctrl+Shift+P → "CodeRabbit: Login"
+```
+
+#### 接続エラー
+```bash
+# 接続状態の確認
+Ctrl+Shift+P → "CodeRabbit: Check Connection"
+```
+
+#### 設定のリセット
+```bash
+# 設定のリセット
+Ctrl+Shift+P → "CodeRabbit: Reset Settings"
+```
+
+### 推奨設定
+
+#### 個人開発者向け
+```json
+{
+  "coderabbit.enabled": true,
+  "coderabbit.autoReview": true,
+  "coderabbit.language": "ja",
+  "coderabbit.profile": "chill",
+  "coderabbit.notifications": true
+}
+```
+
+#### チーム開発向け
+```json
+{
+  "coderabbit.enabled": true,
+  "coderabbit.autoReview": false,
+  "coderabbit.language": "ja",
+  "coderabbit.profile": "assertive",
+  "coderabbit.teamMode": true,
+  "coderabbit.notifications": true
+}
+```
+
+---
+
+## 3. CodeRabbit CLI を使用する方法
 
 ### 環境要件
 - macOS または Linux
@@ -155,18 +322,18 @@ exclude:
 
 ---
 
-## 3. ダッシュボードを使用する方法
+## 4. ダッシュボードを使用する方法
 
 ### 環境要件
 - CodeRabbitアカウント
-- GitHubアカウントとの連携
+- Gitサービスアカウント（GitHub、GitLab、Bitbucket、Azure DevOps等）
 
 ### セットアップ手順
 
 #### ステップ1: アカウント作成
 1. [CodeRabbit公式サイト](https://coderabbit.ai) にアクセス
 2. 「Sign Up」をクリック
-3. GitHubアカウントでログイン
+3. 対応するGitサービスアカウントでログイン
 
 #### ステップ2: リポジトリの連携
 1. ダッシュボードで「Add Repository」をクリック
@@ -177,6 +344,132 @@ exclude:
 1. リポジトリ設定でレビュー設定を調整
 2. 通知設定を構成
 3. チームメンバーの招待
+
+### 対応Gitサービス別セットアップ
+
+#### GitHub
+**前提条件:**
+- GitHubアカウント
+- リポジトリへのアクセス権限
+
+**セットアップ手順:**
+1. CodeRabbitダッシュボードで「GitHub」を選択
+2. GitHubアカウントでOAuth認証
+3. 連携したいリポジトリを選択
+4. 権限設定（Read/Write）を確認・承認
+
+#### GitLab
+**前提条件:**
+- GitLabアカウント（GitLab.com または セルフホスト）
+- リポジトリへのアクセス権限
+
+**セットアップ手順:**
+1. CodeRabbitダッシュボードで「GitLab」を選択
+2. GitLabアカウントでOAuth認証
+3. 連携したいリポジトリを選択
+4. 権限設定を確認・承認
+
+**セルフホストGitLabの場合:**
+```bash
+# GitLabインスタンスのURL設定
+# 例: https://gitlab.yourcompany.com
+```
+
+#### Bitbucket
+**前提条件:**
+- Bitbucketアカウント
+- リポジトリへのアクセス権限
+
+**セットアップ手順:**
+1. CodeRabbitダッシュボードで「Bitbucket」を選択
+2. BitbucketアカウントでOAuth認証
+3. 連携したいリポジトリを選択
+4. 権限設定を確認・承認
+
+#### Azure DevOps
+**前提条件:**
+- Azure DevOpsアカウント
+- プロジェクトへのアクセス権限
+
+**セットアップ手順:**
+1. CodeRabbitダッシュボードで「Azure DevOps」を選択
+2. MicrosoftアカウントでOAuth認証
+3. 連携したいプロジェクト・リポジトリを選択
+4. 権限設定を確認・承認
+
+**Azure DevOps Server（オンプレミス）の場合:**
+```bash
+# カスタムURL設定
+# 例: https://devops.yourcompany.com
+```
+
+### 複数Gitサービスの連携
+
+#### マルチプロバイダー設定
+```yaml
+# .coderabbit.yml での設定例
+reviews:
+  auto_review:
+    enabled: true
+    # 複数のGitサービスに対応
+    providers:
+      - github
+      - gitlab
+      - bitbucket
+      - azure_devops
+```
+
+#### 権限管理
+- **GitHub**: Personal Access Token または OAuth
+- **GitLab**: Personal Access Token または OAuth
+- **Bitbucket**: App Password または OAuth
+- **Azure DevOps**: Personal Access Token または OAuth
+
+### セキュリティ設定
+
+#### アクセストークンの管理
+```bash
+# 環境変数での設定例
+export GITHUB_TOKEN="your-github-token"
+export GITLAB_TOKEN="your-gitlab-token"
+export BITBUCKET_TOKEN="your-bitbucket-token"
+export AZURE_DEVOPS_TOKEN="your-azure-devops-token"
+```
+
+#### 権限の最小化
+- **Read権限**: コードレビューのみ
+- **Write権限**: コメント投稿、ラベル設定
+- **Admin権限**: 設定変更、チーム管理
+
+### トラブルシューティング
+
+#### 認証エラー
+```bash
+# トークンの有効性確認
+curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/user
+curl -H "Authorization: Bearer YOUR_TOKEN" https://gitlab.com/api/v4/user
+```
+
+#### 権限エラー
+- リポジトリのアクセス権限を確認
+- 組織の設定でCodeRabbitを許可
+- プライベートリポジトリの場合は適切な権限を設定
+
+#### 連携の確認
+```bash
+# 各サービスのAPI接続確認
+# GitHub
+curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/repos/owner/repo
+
+# GitLab
+curl -H "Authorization: Bearer YOUR_TOKEN" https://gitlab.com/api/v4/projects/PROJECT_ID
+
+# Bitbucket
+curl -u "username:password" https://api.bitbucket.org/2.0/repositories/owner/repo
+
+# Azure DevOps
+curl -u ":YOUR_TOKEN" https://dev.azure.com/organization/project/_apis/git/repositories
+```
 
 ### プラン比較
 
@@ -190,24 +483,60 @@ exclude:
 
 ---
 
-## 4. 比較表
+## 5. 比較表
 
-| 項目 | GitHub Actions | CLI | ダッシュボード |
-|------|----------------|-----|----------------|
-| **セットアップ** | 中 | 高 | 低 |
-| **カスタマイズ** | 高 | 最高 | 中 |
-| **チーム共有** | 高 | 低 | 最高 |
-| **コスト** | API使用料 | 無料 | プラン料金 |
-| **自動化** | 最高 | 中 | 最高 |
-| **学習コスト** | 中 | 高 | 低 |
+### 導入方法の比較
+
+| 項目 | GitHub Actions | VS Code | CLI | ダッシュボード |
+|------|----------------|---------|-----|----------------|
+| **セットアップ** | 中 | 低 | 高 | 低 |
+| **カスタマイズ** | 高 | 中 | 最高 | 中 |
+| **チーム共有** | 高 | 中 | 低 | 最高 |
+| **コスト** | API使用料 | 無料 | 無料 | プラン料金 |
+| **自動化** | 最高 | 中 | 中 | 最高 |
+| **学習コスト** | 中 | 低 | 高 | 低 |
+| **リアルタイム** | ✗ | ✓ | ✗ | ✗ |
+| **IDE統合** | ✗ | ✓ | ✗ | ✗ |
+
+### Gitサービス別対応状況
+
+| Gitサービス | GitHub Actions | VS Code | CLI | ダッシュボード | 備考 |
+|-------------|----------------|---------|-----|----------------|------|
+| **GitHub** | ✓ | ✓ | ✓ | ✓ | 完全対応 |
+| **GitLab** | △ | ✓ | ✓ | ✓ | セルフホスト対応 |
+| **Bitbucket** | △ | ✓ | ✓ | ✓ | クラウド版対応 |
+| **Azure DevOps** | △ | ✓ | ✓ | ✓ | オンプレミス対応 |
+| **GitHub Enterprise** | ✓ | ✓ | ✓ | ✓ | エンタープライズ対応 |
+| **GitLab CE/EE** | △ | ✓ | ✓ | ✓ | コミュニティ/エンタープライズ版 |
+
+**凡例:**
+- ✓: 完全対応
+- △: 制限あり（設定が必要）
+- ✗: 非対応
+
+### 機能別対応状況
+
+| 機能 | GitHub | GitLab | Bitbucket | Azure DevOps |
+|------|--------|--------|-----------|--------------|
+| **プルリクエストレビュー** | ✓ | ✓ | ✓ | ✓ |
+| **マージリクエストレビュー** | - | ✓ | - | - |
+| **ブランチ保護** | ✓ | ✓ | ✓ | ✓ |
+| **Webhook連携** | ✓ | ✓ | ✓ | ✓ |
+| **API連携** | ✓ | ✓ | ✓ | ✓ |
+| **SSO認証** | ✓ | ✓ | ✓ | ✓ |
+| **組織管理** | ✓ | ✓ | ✓ | ✓ |
 
 ---
 
-## 5. 推奨事項
+## 6. 推奨事項
 
 ### 個人開発者
-1. **GitHub Actions**から開始
-   - セットアップが簡単
+1. **VS Codeプラグイン**から開始
+   - セットアップが最も簡単
+   - リアルタイムレビュー
+   - IDE統合による効率的な作業
+
+2. **GitHub Actions**を併用
    - 自動化レベルが高い
    - コスト効率が良い
 
@@ -217,15 +546,58 @@ exclude:
    - 設定の一元管理
    - 権限管理が容易
 
+2. **VS Codeプラグイン**を併用
+   - 個人作業での効率化
+   - リアルタイムフィードバック
+
 ### 高度なカスタマイズ
 1. **CLI**を選択
    - 最大限のカスタマイズ
    - スクリプト化可能
    - ローカル実行
 
+### 開発環境別推奨事項
+
+#### VS Codeユーザー
+- **個人**: VS Codeプラグイン + GitHub Actions
+- **チーム**: VS Codeプラグイン + ダッシュボード
+- **エンタープライズ**: VS Codeプラグイン + CLI
+
+#### その他のIDEユーザー
+- **個人**: GitHub Actions + ダッシュボード
+- **チーム**: ダッシュボード中心
+- **エンタープライズ**: CLI + ダッシュボード
+
+### Gitサービス別推奨事項
+
+#### GitHub
+- **個人**: GitHub Actions + ダッシュボード
+- **チーム**: ダッシュボード中心
+- **エンタープライズ**: GitHub Enterprise + ダッシュボード
+
+#### GitLab
+- **個人**: CLI + ダッシュボード
+- **チーム**: ダッシュボード中心
+- **セルフホスト**: CLI + カスタム設定
+
+#### Bitbucket
+- **個人**: ダッシュボード
+- **チーム**: ダッシュボード + CLI
+- **エンタープライズ**: ダッシュボード中心
+
+#### Azure DevOps
+- **個人**: ダッシュボード
+- **チーム**: ダッシュボード + CLI
+- **オンプレミス**: CLI + カスタム設定
+
+### マルチプロバイダー環境
+1. **統一管理**: ダッシュボードで複数サービスを統合
+2. **個別最適化**: サービスごとにCLIでカスタマイズ
+3. **段階的導入**: 主要サービスから開始し、段階的に拡張
+
 ---
 
-## 6. トラブルシューティング
+## 7. トラブルシューティング
 
 ### よくある問題
 
@@ -254,6 +626,19 @@ echo $OPENAI_API_KEY
 export OPENAI_API_KEY="your-api-key-here"
 ```
 
+#### VS Code プラグインのエラー
+```bash
+# プラグインの再インストール
+# VS Code拡張機能タブで「CodeRabbit」をアンインストール
+# 再インストール
+
+# 設定のリセット
+Ctrl+Shift+P → "CodeRabbit: Reset Settings"
+
+# ログの確認
+Ctrl+Shift+P → "CodeRabbit: Show Logs"
+```
+
 ### サポート
 
 - **公式ドキュメント**: [CodeRabbit Documentation](https://docs.coderabbit.ai)
@@ -262,21 +647,22 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ---
 
-## 7. まとめ
+## 8. まとめ
 
 CodeRabbitは、AIを活用したコードレビューの自動化により、開発効率とコード品質の向上を実現する強力なツールです。
 
 **推奨アプローチ:**
-1. 個人開発者はGitHub Actionsから開始
-2. チーム開発ではダッシュボードを活用
-3. 高度なカスタマイズが必要な場合はCLIを使用
-4. 段階的に機能を拡張していく
+1. VS Codeユーザーはプラグインから開始
+2. 個人開発者はVS Codeプラグイン + GitHub Actions
+3. チーム開発ではダッシュボードを活用
+4. 高度なカスタマイズが必要な場合はCLIを使用
+5. 段階的に機能を拡張していく
 
 適切な設定と使用方法により、CodeRabbitは開発ワークフローを大幅に効率化するでしょう。
 
 ---
 
-## 8. coderabbit.yaml 設定項目詳細
+## 9. coderabbit.yaml 設定項目詳細
 
 ### 基本設定
 
