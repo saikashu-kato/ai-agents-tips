@@ -1,0 +1,168 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# 基本設定
+language: "ja"
+tone_instructions: "日本語で丁寧で分かりやすいレビューをお願いします。技術的な指摘は具体的で実用的な改善提案を含めてください。"
+
+# レビュー設定
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  poem: true
+  review_status: true
+  commit_status: true
+  
+  # 自動レビュー設定
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: ["main", "develop"]
+  
+  # パスフィルター（node_modulesを除外）
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+    - "!build/**"
+    - "!coverage/**"
+    - "!*.log"
+  
+  # 拡張子別レビュー観点
+  path_instructions:
+    # JavaScript/TypeScript
+    - path: "**/*.{js,jsx,ts,tsx}"
+      instructions: |
+        JavaScript/TypeScriptファイルのレビュー観点：
+        - コードの可読性と保守性
+        - パフォーマンスの最適化（不要な再レンダリング、メモ化等）
+        - エラーハンドリングの適切な実装
+        - 型安全性の確保（TypeScript使用時）
+        - セキュリティリスク（XSS、インジェクション等）
+        - 非同期処理の適切な実装
+        - 関数の単一責任原則
+        - 変数・関数名の命名規則
+        - コメントの適切性
+    
+    # Reactコンポーネント
+    - path: "**/*.{jsx,tsx}"
+      instructions: |
+        Reactコンポーネントのレビュー観点：
+        - コンポーネントの再利用性とモジュール性
+        - パフォーマンス最適化（React.memo、useMemo、useCallback等）
+        - アクセシビリティ（ARIA属性、キーボード操作、スクリーンリーダー対応）
+        - プロップタイプの適切な定義とバリデーション
+        - 状態管理の適切性（useState、useEffect、カスタムフック等）
+        - ライフサイクルメソッドの適切な使用
+        - イベントハンドリングの最適化
+        - コンポーネントの分割と責任分離
+        - スタイリング手法の一貫性
+    
+    # CSS/SCSS/Styled Components
+    - path: "**/*.{css,scss,sass,styled}"
+      instructions: |
+        CSS/スタイルファイルのレビュー観点：
+        - セマンティックなHTML構造との整合性
+        - レスポンシブデザインの実装
+        - アクセシビリティ（色のコントラスト、フォーカス表示等）
+        - パフォーマンス（不要なCSS、重複スタイル等）
+        - メンテナンス性（BEM、CSS Modules等の命名規則）
+        - ブラウザ互換性
+        - アニメーション・トランジションの適切な実装
+        - カラーシステムとデザインシステムの一貫性
+    
+    # HTML
+    - path: "**/*.html"
+      instructions: |
+        HTMLファイルのレビュー観点：
+        - セマンティックなHTML構造
+        - アクセシビリティ（ARIA属性、alt属性、見出し構造等）
+        - SEO最適化（メタタグ、構造化データ等）
+        - パフォーマンス（画像最適化、リソース読み込み等）
+        - セキュリティ（XSS対策、CSRF対策等）
+        - モバイルフレンドリーな実装
+        - フォームの適切な実装
+    
+    # Python
+    - path: "**/*.py"
+      instructions: |
+        Pythonファイルのレビュー観点：
+        - PEP8コーディング規約の遵守
+        - 型ヒントの適切な使用
+        - エラーハンドリングの実装
+        - ドキュメンテーション文字列の記述
+        - パフォーマンス（アルゴリズムの効率性）
+        - セキュリティ（SQLインジェクション、パストラバーサル等）
+        - テストの網羅性
+        - 依存関係の管理
+    
+    # Java
+    - path: "**/*.java"
+      instructions: |
+        Javaファイルのレビュー観点：
+        - オブジェクト指向設計原則の遵守
+        - デザインパターンの適切な使用
+        - 例外処理の実装
+        - メモリ管理とガベージコレクション
+        - スレッドセーフティ
+        - パフォーマンス最適化
+        - セキュリティ（入力検証、認証・認可等）
+        - コードの可読性と保守性
+    
+    # JSON/YAML設定ファイル
+    - path: "**/*.{json,yaml,yml}"
+      instructions: |
+        設定ファイルのレビュー観点：
+        - 設定値の妥当性と一貫性
+        - セキュリティ（機密情報の露出等）
+        - 環境別設定の適切な分離
+        - 設定の文書化
+        - デフォルト値の適切性
+        - バリデーションルールの実装
+    
+    # テストファイル
+    - path: "**/*.{test,spec}.{js,ts,py,java}"
+      instructions: |
+        テストファイルのレビュー観点：
+        - テストケースの網羅性
+        - テストの可読性と保守性
+        - モックとスタブの適切な使用
+        - エッジケースのテスト
+        - テストデータの適切性
+        - テストの実行速度と安定性
+        - アサーションの明確性
+    
+    # ドキュメントファイル
+    - path: "**/*.{md,rst,txt}"
+      instructions: |
+        ドキュメントファイルのレビュー観点：
+        - 内容の正確性と最新性
+        - 読みやすさと構成
+        - 技術的な説明の明確性
+        - コード例の動作確認
+        - リンクの有効性
+        - 用語の統一性
+        - 対象読者への配慮
+
+# ラベル設定
+  labeling_instructions:
+    - label: "bug"
+      instructions: "バグ修正に関する変更"
+    - label: "enhancement"
+      instructions: "新機能追加に関する変更"
+    - label: "frontend"
+      instructions: "フロントエンド関連の変更"
+    - label: "backend"
+      instructions: "バックエンド関連の変更"
+    - label: "documentation"
+      instructions: "ドキュメント関連の変更"
+    - label: "test"
+      instructions: "テスト関連の変更"
+    - label: "refactor"
+      instructions: "リファクタリング"
+    - label: "performance"
+      instructions: "パフォーマンス改善"
+    - label: "security"
+      instructions: "セキュリティ関連の変更"
+
+# チャット機能
+chat:
+  auto_reply: true
