@@ -1,0 +1,214 @@
+name: Codex Issue Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+permissions:
+      contents: write
+jobs:
+  codex:
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request == null &&
+       contains(github.event.comment.body, '@codex')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@codex'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      feedback: ${{ steps.extract_codex.outputs.feedback }}
+      create_pr: ${{ steps.extract_codex.outputs.create_pr }}
+      pr_title: ${{ steps.extract_codex.outputs.pr_title }}
+      pr_body: ${{ steps.extract_codex.outputs.pr_body }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      # this step assumes a Node.js project; modify as needed for other environments
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # this step assumes a Node.js project; modify as needed for other environments
+      # dependencies must installed before running Codex Action because Codex do not have internet access
+      - name: run npm install
+        run: npm install
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "codex[bot]"
+          git config --global user.email "codex[bot]@users.noreply.github.com"
+          git switch -c codex/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+          
+      - name: Record base commit
+        run: echo "BASE_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          
+      - name: Run Codex Issue Action
+        id: run_codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          output-schema: |
+            {
+              "type": "object",
+              "properties": {
+                "feedback": {
+                  "type": "string"
+                },
+                "create-pull-request": {
+                  "type": "object",
+                  "properties": {
+                    "enable": {
+                      "type": "boolean"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "enable",
+                    "title",
+                    "body"
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "feedback",
+                "create-pull-request"
+              ]
+            }
+
+          prompt: |
+            This is Issue #${{ github.event.issue.number }} in the repository ${{ github.repository }}.
+            Issue Title: ${{ github.event.issue.title }}
+            Issue Body:
+            ----
+            ${{ github.event.issue.body }}
+            ----
+            Issue State: ${{ github.event.issue.state }}
+            Issue Labels: ${{ join(github.event.issue.labels.*.name, ', ') }}
+
+            Comment that mentions @codex:
+            ----
+            ${{ github.event.comment.body || '(It triggered by issue opened)' }}
+            ----
+
+            You are now on branch: codex/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+            
+            Here are some guidelines to follow:
+            - If the comment or issue body contains specific questions or requests for changes, address them directly.
+            - If the comment or issue body is vague or lacks context, ask for clarification.
+            - Make sure to make commits of your work so that user could see the changes.
+            - Make commits atomic and descriptive.
+            - Make sure to run formatter and pass the tests before make your commits.
+            - Branch automatically pushed and PR will be created if you enable "create-pull-request" field in your final message.
+            - You must open PR unless you did not make any commit, just give feedback to user.
+            - Avoid making assumptions about the author's intent or knowledge level.
+
+            Read the ${{github.event_name == 'issue_comment' && 'comment' || 'issue body'}} above and respond based on the guidelines above
+      
+      - name: Extract Codex Outputs
+        id: extract_codex
+        env:
+          CODEX_FINAL_MESSAGE: ${{ steps.run_codex.outputs.final-message }}
+        run: |
+          final_message_file=$(mktemp)
+          printf '%s' "$CODEX_FINAL_MESSAGE" > "$final_message_file"
+
+          feedback=$(jq -r '.feedback' "$final_message_file")
+          create_pr=$(jq -r '."create-pull-request".enable' "$final_message_file")
+          pr_title=$(jq -r '."create-pull-request".title' "$final_message_file")
+          pr_body=$(jq -r '."create-pull-request".body' "$final_message_file")
+
+          {
+            echo "feedback<<EOF"
+            printf '%s\n' "$feedback"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "create_pr<<EOF"
+            printf '%s\n' "$create_pr"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "pr_title<<EOF"
+            printf '%s\n' "$pr_title"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "pr_body<<EOF"
+            printf '%s\n' "$pr_body"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          rm -f "$final_message_file"
+          
+      - name: Push the branch
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$BASE_COMMIT" ]; then
+            echo "No new commits detected; skipping push."
+          else
+            git push origin codex/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+          fi
+                  
+  open_pr:
+    runs-on: ubuntu-latest
+    needs: codex
+    if: needs.codex.outputs.create_pr == 'true'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Open pull request
+        uses: actions/github-script@v7
+        env:
+          PR_TITLE: ${{ needs.codex.outputs.pr_title }}
+          PR_BODY: ${{ needs.codex.outputs.pr_body }}
+          PR_HEAD: "codex/issue-${{ github.event.issue.number }}-${{ github.run_id }}"
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: process.env.PR_TITLE,
+              body: process.env.PR_BODY,
+              head: process.env.PR_HEAD,
+              base: context.payload.repository.default_branch,
+            });
+
+  post_feedback:
+    runs-on: ubuntu-latest
+    needs: codex
+    if: needs.codex.outputs.feedback != ''
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+        - name: Post feedback
+          uses: actions/github-script@v7
+          env:
+            CODEX_FINAL_MESSAGE: ${{ needs.codex.outputs.feedback }}
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: process.env.CODEX_FINAL_MESSAGE,
+              });

@@ -1,0 +1,128 @@
+{
+  "name": "dev-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3a152220-b478-43c1-b28c-f7b5c40348e0",
+      "name": "When chat message received",
+      "webhookId": "3954b3e0-4bb1-4762-8870-b204b35941e3"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-opus-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-opus-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.chatInput }}"
+            },
+            {
+              "content": "あなたは優秀なエンジニアです。\n与えられた内容から、Codex CLIに送るための実装計画を立ててください。\n\n## 制限\n・実行計画の内容は500トークン以内\n・マークダウン形式は使わず。コマンドラインで送れる内容とする。"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "79504635-1d09-4bda-92a5-98df1d8b0cc1",
+      "name": "Message a model",
+      "alwaysOutputData": true,
+      "credentials": {
+        "anthropicApi": {
+          "id": "2pjgvJMbWqdMjdfc",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "iihara-tkts",
+          "mode": "list",
+          "cachedResultName": "iihara-tkts",
+          "cachedResultUrl": "https://github.com/iihara-tkts"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "mcp-test-by-claude",
+          "mode": "list",
+          "cachedResultName": "mcp-test-by-claude",
+          "cachedResultUrl": "https://github.com/iihara-tkts/mcp-test-by-claude"
+        },
+        "title": "create-code",
+        "body": "=@codex \n\"{{ $json.content[0].text }}\"",
+        "labels": [],
+        "assignees": []
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        80
+      ],
+      "id": "b855446a-2729-44c5-a433-8415f5b98ac2",
+      "name": "Create an issue",
+      "webhookId": "96d868b2-ec7a-483e-bc1f-e46dc434d928",
+      "credentials": {
+        "githubApi": {
+          "id": "rQJ3sOIGqoiaTZcr",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create an issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60c1fa41-2b0a-4690-89d6-519301a96c41",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c04a3811ab540db41a8c6438c426d6a1fb687bd4e7a1906f7b6181eea2875f47"
+  },
+  "id": "ojxLZ39drFyi8WS9",
+  "tags": []
+}
